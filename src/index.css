@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "DM Sans", system-ui, sans-serif;
+  --font-display: "Fraunces", Georgia, serif;
+  --color-brand-50: #ecfdf8;
+  --color-brand-100: #d1faf0;
+  --color-brand-200: #a7f3e0;
+  --color-brand-400: #34d399;
+  --color-brand-500: #10b981;
+  --color-brand-600: #059669;
+  --color-brand-700: #047857;
+  --color-ink-950: #0a0f1a;
+  --color-ink-900: #111827;
+  --color-ink-800: #1e293b;
+  --color-ink-600: #475569;
+  --color-ink-500: #64748b;
+  --color-ink-400: #94a3b8;
+  --color-surface: #f8fafc;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    color: var(--color-ink-800);
+    background: var(--color-surface);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #root {
+    min-height: 100svh;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #047857 0%, #10b981 45%, #34d399 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .mesh-bg {
+    background-color: #f8fafc;
+    background-image:
+      radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.12) 0, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(52, 211, 153, 0.08) 0, transparent 45%),
+      radial-gradient(at 50% 100%, rgba(4, 120, 87, 0.06) 0, transparent 50%);
+  }
+
+  .grid-pattern {
+    background-image:
+      linear-gradient(rgba(15, 23, 42, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(15, 23, 42, 0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+}

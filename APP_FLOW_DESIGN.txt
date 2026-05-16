@@ -1,0 +1,399 @@
+================================================================================
+                    GOALFLOW — APP FLOW DESIGN
+              (Visual guide to understand how the app works)
+================================================================================
+
+Read this file to SEE how users move through the system.
+For rules, validation, and data model → see APP_WORKFLOW.txt
+
+
+================================================================================
+                    THE BIG PICTURE (3 ACTS)
+================================================================================
+
+    ACT 1                    ACT 2                         ACT 3
+  SET GOALS              TRACK PROGRESS                  GOVERN
+  (May)                  (Jul → Apr)                  (HR anytime)
+
+  Employee               Employee + Manager            Admin / HR
+  writes sheet           update each quarter           reports & audit
+
+       │                        │                            │
+       ▼                        ▼                            ▼
+  Manager approves         Planned vs Actual            Export, dashboard,
+  → goals LOCK             + comments                   unlock, logs
+
+
+================================================================================
+                    WHO USES WHAT (SIMPLE MAP)
+================================================================================
+
+                         ┌─────────────────┐
+                         │   GOALFLOW      │
+                         │   (one portal)  │
+                         └────────┬────────┘
+                                  │
+            ┌─────────────────────┼─────────────────────┐
+            │                     │                     │
+            ▼                     ▼                     ▼
+     ┌────────────┐       ┌────────────┐       ┌────────────┐
+     │  EMPLOYEE  │       │ MANAGER L1 │       │ ADMIN / HR │
+     └────────────┘       └────────────┘       └────────────┘
+            │                     │                     │
+     • Draft goals          • Approve team        • Set calendar
+     • Submit sheet         • Check-in view       • Org chart
+     • Enter actuals        • Write comments      • Unlock goals
+     • Set status           • Push shared KPI     • Export CSV
+                            • Team dashboard      • Audit logs
+
+
+================================================================================
+              FLOW 1 — EMPLOYEE: FROM BLANK SHEET TO LOCKED
+================================================================================
+
+  START (login as Employee)
+    │
+    ▼
+  ┌─────────────────────────────────────┐
+  │  Open "My Goal Sheet"               │
+  │  Status: DRAFT                      │
+  └─────────────────┬───────────────────┘
+                    │
+                    ▼
+  ┌─────────────────────────────────────┐
+  │  Add goals (up to 8)                │
+  │  For each goal:                     │
+  │    • Thrust area                    │
+  │    • Title + description            │
+  │    • UoM + target                   │
+  │    • Weightage %                    │
+  └─────────────────┬───────────────────┘
+                    │
+                    ▼
+            ┌───────────────┐
+            │ Valid?        │
+            │ • Sum = 100%  │
+            │ • Each ≥ 10%  │
+            │ • ≤ 8 goals   │
+            └───┬───────┬─────┘
+               NO      YES
+                │       │
+                ▼       ▼
+         Fix weight   ┌──────────────────┐
+         & retry      │  Click SUBMIT    │
+                      └────────┬─────────┘
+                               │
+                               ▼
+                      Status: SUBMITTED
+                      (employee cannot edit)
+                               │
+                               │  ... manager acts ...
+                               │
+              ┌────────────────┴────────────────┐
+              │                                 │
+              ▼                                 ▼
+     Manager RETURNED                   Manager APPROVED
+              │                                 │
+              ▼                                 ▼
+     Status: RETURNED                    Status: LOCKED
+     Employee edits again                Employee: view only
+     → back to validation                 Actuals in Q windows
+
+
+================================================================================
+           FLOW 2 — MANAGER: APPROVE OR SEND BACK (PHASE 1)
+================================================================================
+
+  START (login as Manager, May window open)
+    │
+    ▼
+  ┌─────────────────────────────────────┐
+  │  Team Dashboard                     │
+  │  Lists: Pending | Approved | Returned│
+  └─────────────────┬───────────────────┘
+                    │
+                    ▼
+  ┌─────────────────────────────────────┐
+  │  Open employee's submitted sheet    │
+  │  See all goals in a table           │
+  └─────────────────┬───────────────────┘
+                    │
+                    ▼
+            ┌───────────────┐
+            │  Decision?    │
+            └───┬───┬───┬───┘
+                │   │   │
+        RETURN  │   │   │  APPROVE
+                │   │   │
+                ▼   │   ▼
+    ┌───────────────┐ │ ┌──────────────────┐
+    │ Add reason    │ │ │ Goals LOCK       │
+    │ Employee      │ │ │ Sheet complete   │
+    │ re-edits      │ │ └──────────────────┘
+    └───────────────┘ │
+                      │
+              EDIT INLINE (optional anytime before approve)
+                      │
+                      ▼
+              Change target or weightage
+              on manager screen
+                      │
+                      └──► then APPROVE or RETURN
+
+
+================================================================================
+        FLOW 3 — QUARTERLY CHECK-IN (REPEATS 4 TIMES PER YEAR)
+================================================================================
+
+  WHEN:  July (Q1) | October (Q2) | January (Q3) | Mar-Apr (Q4 final)
+
+  ─── EMPLOYEE SIDE ───
+
+  START (check-in window OPEN)
+    │
+    ▼
+  ┌─────────────────────────────────────┐
+  │  "Q2 Check-in" screen               │
+  │  Shows each LOCKED goal:            │
+  │    Planned target (read-only)       │
+  └─────────────────┬───────────────────┘
+                    │
+                    ▼
+  For each goal enter:
+    • Actual achievement  ──────►  System calculates progress %
+    • Status:  [ Not Started | On Track | Completed ]
+                    │
+                    ▼
+              Save check-in
+                    │
+                    ▼
+              Employee done for this quarter
+
+
+  ─── MANAGER SIDE (same quarter) ───
+
+  START
+    │
+    ▼
+  ┌─────────────────────────────────────┐
+  │  Team check-in list                 │
+  │  Who updated? Who is pending?       │
+  └─────────────────┬───────────────────┘
+                    │
+                    ▼
+  ┌─────────────────────────────────────┐
+  │  Open one employee                  │
+  │  Table: Planned | Actual | Status | %│
+  └─────────────────┬───────────────────┘
+                    │
+                    ▼
+  ┌─────────────────────────────────────┐
+  │  Write structured check-in comment  │
+  │  Save                              │
+  └─────────────────┬───────────────────┘
+                    │
+                    ▼
+              Manager done for this report
+
+
+================================================================================
+              FLOW 4 — SHARED DEPARTMENT KPI (OPTIONAL)
+================================================================================
+
+  START (Admin or Manager)
+    │
+    ▼
+  ┌─────────────────────────────────────┐
+  │  Create departmental KPI            │
+  │  Title + Target (fixed for all)     │
+  │  Pick employees to receive it       │
+  │  Pick ONE primary owner             │
+  └─────────────────┬───────────────────┘
+                    │
+                    ▼
+  KPI appears on each employee's sheet
+                    │
+        ┌───────────┴───────────┐
+        │                       │
+        ▼                       ▼
+  RECIPIENT sees            PRIMARY OWNER
+  Title: locked             updates ACTUAL
+  Target: locked                  │
+  Weight: can adjust              │
+        │                         │
+        └───────────┬─────────────┘
+                    │
+                    ▼
+         Actual syncs to ALL linked sheets
+         (same number everywhere)
+
+
+================================================================================
+              FLOW 5 — ADMIN EXCEPTION & REPORTING
+================================================================================
+
+  UNLOCK FLOW (when locked goal must change)
+  ─────────────────────────────────────────
+  Admin → Find employee sheet → Unlock
+    → Edit allowed again
+    → Every change logged (audit)
+    → Re-lock when done
+
+
+  REPORTING FLOW
+  ──────────────
+  Admin/HR → Completion dashboard
+              "Who finished Q2 check-in?"
+            → Export achievement report
+              CSV/Excel: all staff, planned vs actual
+
+
+================================================================================
+              GOAL SHEET STATE MACHINE (CORE)
+================================================================================
+
+                    ┌─────────┐
+                    │  DRAFT  │◄─────────────────┐
+                    └────┬────┘                  │
+                         │ submit                │ return
+                         ▼                       │
+                    ┌─────────┐                  │
+                    │SUBMITTED│──────────────────┤
+                    └────┬────┘                  │
+                         │ approve              │
+                         ▼                       │
+                    ┌─────────┐                  │
+                    │ LOCKED  │──────────────────┘
+                    └────┬────┘     (only via RETURN
+                         │           before re-approve)
+                         │
+              quarterly check-ins only
+              (actual + status, not target)
+
+
+  Legend:
+    DRAFT     = employee edits freely
+    SUBMITTED = waiting for manager
+    LOCKED    = approved; structure frozen
+    RETURNED  = same as draft for employee
+
+
+================================================================================
+              CALENDAR — WHAT IS ACTIVE WHEN
+================================================================================
+
+  Month     │  Portal mode for most users
+  ──────────┼──────────────────────────────────────────────────
+  Before May│  Goal setting: CLOSED (or preview only)
+  May       │  ● GOAL SETTING OPEN — create, submit, approve
+  Jun       │  Usually closed until July (buffer)
+  July      │  ● Q1 CHECK-IN OPEN
+  Aug-Sep   │  Closed / read-only until October
+  October   │  ● Q2 CHECK-IN OPEN
+  Nov-Dec   │  Closed until January
+  January   │  ● Q3 CHECK-IN OPEN
+  Feb       │  Closed until March
+  Mar-Apr   │  ● Q4 / FINAL ACHIEVEMENT OPEN
+
+  Admin can configure exact dates; app blocks wrong actions.
+
+
+================================================================================
+              ONE PAGE: EMPLOYEE YEAR IN THE APP
+================================================================================
+
+  May        Build goal sheet → fix until 100% → Submit
+  May-Jun    Wait (manager approves or returns)
+  After OK   Sheet locked — view goals only
+  July       Q1: enter actuals + status
+  October    Q2: enter actuals + status
+  January    Q3: enter actuals + status
+  Mar-Apr    Q4: final actuals + status
+  Anytime    See progress % (auto-calculated)
+
+
+================================================================================
+              ONE PAGE: MANAGER YEAR IN THE APP
+================================================================================
+
+  May        Review each report → edit/approve/return
+  Optional   Push shared KPI to team
+  Each Q     See team planned vs actual → add comment
+  Anytime    Dashboard: who is late on submit or check-in
+
+
+================================================================================
+              PROGRESS SCORE — QUICK DECISION TREE
+================================================================================
+
+  When employee saves actual, system asks:
+
+  What UoM was this goal?
+
+      Numeric/% and HIGHER is better?  →  score = Actual ÷ Target
+      Numeric/% and LOWER is better?   →  score = Target ÷ Actual
+      Timeline (deadline date)?        →  score from date vs deadline
+      Zero-based (0 = good)?           →  Actual=0 → 100%, else 0%
+
+  Show % on employee & manager screens (tracking only).
+
+
+================================================================================
+              SCREEN FLOW (NAVIGATION TREE)
+================================================================================
+
+  Landing (public)
+    └── Sign in
+          ├── Employee home
+          │     ├── My Goal Sheet
+          │     ├── Current check-in (if window open)
+          │     └── My progress history
+          │
+          ├── Manager home
+          │     ├── Team dashboard
+          │     ├── Approve sheet [employee]
+          │     ├── Check-in [employee]
+          │     └── Push shared KPI
+          │
+          └── Admin home
+                ├── Cycle settings
+                ├── Org hierarchy
+                ├── Unlock sheet
+                ├── Audit log
+                ├── Completion dashboard
+                └── Export reports
+
+
+================================================================================
+              EXAMPLE WALKTHROUGH (STORY)
+================================================================================
+
+  1. Priya (Employee) logs in May 3.
+  2. Adds 4 goals: Revenue 30%, NPS 25%, TAT 25%, Training 20%.
+  3. App shows "100% — ready to submit". She submits.
+  4. Raj (Manager) sees Priya "Pending". Tweaks TAT target, approves.
+  5. Priya's sheet is LOCKED.
+  6. July: Priya enters Q1 actuals; status "On Track". Score auto-shows 78%.
+  7. Raj opens Priya's Q1 view, writes check-in comment, saves.
+  8. HR (Admin) exports July report: planned vs actual for all staff.
+  9. October → repeat steps 6–7 for Q2.
+ 10. Admin unlocks one goal for Priya after policy change — audit log records it.
+
+
+================================================================================
+                         HOW THE TWO .TXT FILES RELATE
+================================================================================
+
+  APP_FLOW_DESIGN.txt  ← YOU ARE HERE
+      • Diagrams and journeys
+      • Easy to read top-to-bottom
+      • Good for demos and onboarding
+
+  APP_WORKFLOW.txt
+      • Full rules, tables, entities, checklist
+      • Good for developers implementing features
+
+
+================================================================================
+                              END OF FLOW DESIGN
+================================================================================

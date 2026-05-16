@@ -1,0 +1,398 @@
+================================================================================
+                    GOALFLOW — APPLICATION WORKFLOW
+         Goal Setting & Tracking Portal (AtomQuest / Atomberg BRD)
+================================================================================
+
+Document purpose : End-to-end workflow, roles, states, rules, and calendar
+                   for developers building GoalFlow.
+Last updated     : Based on BRD Sections 1–4, 2.1–2.3, 3, 4, 6
+
+
+================================================================================
+1. PROBLEM THE APP SOLVES
+================================================================================
+
+Organizations using spreadsheets, email, and offline reviews suffer from:
+
+  • Misalignment     — employees unclear how work ties to org priorities
+  • Blind spots      — managers lack real-time team progress visibility
+  • Accountability — HR rebuilds data at appraisal time instead of trusting records
+
+GoalFlow replaces fragmented tools with ONE portal for the full goal lifecycle:
+create → align → approve → lock → track quarterly → report → audit.
+
+
+================================================================================
+2. USER ROLES & ACCESS
+================================================================================
+
+┌─────────────┬──────────────────────────────────┬─────────────────────────────┐
+│ ROLE        │ RESPONSIBILITIES                 │ SYSTEM CAPABILITIES         │
+├─────────────┼──────────────────────────────────┼─────────────────────────────┤
+│ Employee    │ Draft goals; enter quarterly     │ Create/edit goals BEFORE    │
+│             │ actuals; update progress status  │ submission; view LOCKED     │
+│             │                                  │ goals; input actuals in     │
+│             │                                  │ check-in windows only       │
+├─────────────┼──────────────────────────────────┼─────────────────────────────┤
+│ Manager L1  │ Review & approve goal sheets;    │ Team dashboard; inline edit │
+│             │ conduct quarterly check-ins;     │ targets/weightage DURING    │
+│             │ log structured feedback          │ approval; comment logs      │
+├─────────────┼──────────────────────────────────┼─────────────────────────────┤
+│ Admin / HR  │ Configure cycles; org hierarchy; │ Cycle management; exception │
+│             │ oversee completion; reporting    │ handling; audit logs; UNLOCK│
+│             │                                  │ locked goals when needed    │
+└─────────────┴──────────────────────────────────┴─────────────────────────────┘
+
+Rule: Each role sees a different UI and action set (RBAC). Same portal, gated features.
+
+
+================================================================================
+3. ANNUAL CALENDAR — ENFORCED WINDOWS
+================================================================================
+
+The portal MUST enable/disable actions by period (date-gated).
+
+  Period                  Window opens    Allowed actions
+  ─────────────────────────────────────────────────────────────────────────────
+  Phase 1 — Goal Setting  1 May           Create goal sheet, submit, manager
+                                          approve or return for rework
+
+  Q1 Check-in             July            Progress update: planned vs actual,
+                                          status per goal, manager comment
+
+  Q2 Check-in             October         Same as Q1
+
+  Q3 Check-in             January         Same as Q1
+
+  Q4 / Annual             March / April   Final achievement capture
+
+Outside an open window → relevant screens read-only or hidden (configurable by Admin).
+
+
+================================================================================
+4. MASTER WORKFLOW (HIGH LEVEL)
+================================================================================
+
+                    ┌──────────────────────┐
+                    │  Admin sets cycle &  │
+                    │  org hierarchy       │
+                    └──────────┬───────────┘
+                               │
+         ┌─────────────────────▼─────────────────────┐
+         │  PHASE 1 (May): GOAL CREATION & APPROVAL   │
+         └─────────────────────┬─────────────────────┘
+                               │
+              Employee drafts Goal Sheet (max 8 goals)
+                               │
+              Validates: 100% weight | min 10% each | max 8 goals
+                               │
+              Employee SUBMITS ──► Manager reviews
+                               │
+              ┌────────────────┼────────────────┐
+              │                │                │
+         Return for         Approve          (optional:
+         rework               │            Admin/Manager
+              │                │            push Shared KPI)
+              ▼                ▼
+         Employee          GOALS LOCKED
+         edits again        (no edit without Admin unlock)
+                               │
+         ┌─────────────────────▼─────────────────────┐
+         │  PHASE 2: QUARTERLY CHECK-INS (Jul–Apr)    │
+         └─────────────────────┬─────────────────────┘
+                               │
+              Employee: actual achievement + status per goal
+              System: auto progress score (by UoM type)
+              Manager: planned vs actual view + check-in comment
+                               │
+         ┌─────────────────────▼─────────────────────┐
+         │  REPORTING & GOVERNANCE (ongoing / HR)       │
+         │  Export, completion dashboard, audit trail   │
+         └─────────────────────────────────────────────┘
+
+
+================================================================================
+5. PHASE 1 — GOAL CREATION & APPROVAL (DETAIL)
+================================================================================
+
+5.1 EMPLOYEE: BUILD GOAL SHEET
+────────────────────────────────
+For each goal (1 to 8 goals):
+
+  Field                    Description
+  ─────────────────────────────────────────────────────────
+  Thrust Area              Selected category (strategic bucket)
+  Goal Title               Short name
+  Goal Description         Detail text
+  Unit of Measurement      Numeric | % | Timeline | Zero-based
+                           (+ Min or Max direction for numeric/% — see §7)
+  Target                   Planned value (number, %, date, or zero metric)
+  Weightage                % of employee's total (must sum to 100%)
+
+5.2 VALIDATION RULES (BLOCK SUBMIT IF FAIL)
+───────────────────────────────────────────
+  Rule                              Requirement
+  ─────────────────────────────────────────────────────────
+  Total weightage                   Must equal exactly 100%
+  Minimum per goal                  Each goal ≥ 10% weightage
+  Maximum goals                     ≤ 8 goals per employee
+
+  UI should show running total (e.g. "72% / 100%") while drafting.
+
+5.3 GOAL SHEET STATES
+─────────────────────
+  State              Who can edit what
+  ─────────────────────────────────────────────────────────
+  DRAFT              Employee: all fields on own goals
+  SUBMITTED          Employee: read-only; Manager: review
+  RETURNED           Employee: edit again (back to draft-like)
+  APPROVED / LOCKED  Employee: read-only; Manager: check-ins only
+                     Admin: can UNLOCK → exception edit + audit log
+
+5.4 MANAGER APPROVAL WORKFLOW
+─────────────────────────────
+  1. Employee submits Goal Sheet
+  2. Manager opens team queue / employee sheet
+  3. Manager actions:
+       • APPROVE          → sheet locks for employee
+       • RETURN           → employee notified, must rework
+       • EDIT INLINE      → adjust target and/or weightage during review
+  4. On APPROVE:
+       • All goals on sheet become LOCKED
+       • Further structural edits require Admin unlock
+       • Changes after lock (via unlock) → audit trail (who/what/when)
+
+5.5 SHARED GOALS (DEPARTMENTAL KPI)
+───────────────────────────────────
+  Initiator: Admin OR Manager
+
+  1. Create/push a departmental KPI to multiple employees
+  2. On each recipient's sheet:
+       • Goal Title  → READ-ONLY
+       • Target      → READ-ONLY
+       • Weightage   → recipient MAY adjust (must still obey 100%/10%/8 rules)
+  3. Primary owner:
+       • One designated employee updates ACHIEVEMENT (actuals)
+  4. Sync:
+       • Actual achievement updates propagate to ALL linked copies
+
+  Use case: Same KPI rolled to a team; one person owns numbers, everyone aligns weight.
+
+
+================================================================================
+6. PHASE 2 — ACHIEVEMENT TRACKING & QUARTERLY CHECK-INS (DETAIL)
+================================================================================
+
+Prerequisite: Goal Sheet APPROVED (locked targets = "planned").
+
+6.1 EMPLOYEE — QUARTERLY UPDATE (per open window: Jul / Oct / Jan / Mar-Apr)
+────────────────────────────────────────────────────────────────────────────
+  Per goal:
+    • Actual Achievement   (entered value vs locked Planned Target)
+    • Status               one of:
+                             - Not Started
+                             - On Track
+                             - Completed
+
+  System calculates Progress Score automatically (see §7).
+  Scores are for TRACKING only — not final performance ratings.
+
+6.2 MANAGER — CHECK-IN MODULE
+─────────────────────────────
+  • View Planned vs Achievement for EVERY direct report
+  • Add Structured Check-in Comment (feedback log per employee per period)
+  • Completion visible on HR completion dashboard
+
+6.3 DATA CAPTURED PER CHECK-IN PERIOD
+─────────────────────────────────────
+  Employee ID | Goal ID | Period (Q1/Q2/Q3/Q4) | Actual | Status |
+  Progress Score (computed) | Manager Comment | Timestamp
+
+
+================================================================================
+7. PROGRESS SCORE CALCULATION (SYSTEM)
+================================================================================
+
+Based on UoM type selected at goal creation:
+
+  UoM type              When to use              Formula
+  ─────────────────────────────────────────────────────────────────────────
+  Min (Numeric / %)     Higher is better         Achievement ÷ Target
+                        e.g. revenue, NPS
+
+  Max (Numeric / %)     Lower is better          Target ÷ Achievement
+                        e.g. TAT, cost
+
+  Timeline              Date-based completion    Compare completion date
+                                                 vs deadline (BRD: ratio
+                                                 from dates — implement
+                                                 consistent rule, e.g.
+                                                 on-time = 100%, late = scaled)
+
+  Zero-based            Zero = success           If achievement = 0 → 100%
+                        e.g. safety incidents    Else → 0%
+
+Edge cases to handle in code:
+  • Target = 0 for Min/Max → avoid divide-by-zero; show error or N/A
+  • Achievement missing in window → treat as not updated / 0% per product rule
+  • Cap display at 100% if formula exceeds 1.0 (optional UX polish)
+
+
+================================================================================
+8. REPORTING & GOVERNANCE
+================================================================================
+
+8.1 ACHIEVEMENT REPORT
+  • Export: CSV and/or Excel
+  • Rows: all employees
+  • Columns include: Planned Target vs Actual Achievement (per goal / summary)
+
+8.2 COMPLETION DASHBOARD (Admin / HR)
+  • Real-time: which employees completed quarterly check-in for current period
+  • Real-time: which managers completed their check-in comments
+  • Filters: team, period, department
+
+8.3 AUDIT TRAIL
+  • Trigger: any change to goals AFTER lock date
+  • Log fields: user ID, role, field changed, old value, new value, timestamp
+  • Includes Admin unlock edits and shared-goal sync events (recommended)
+
+
+================================================================================
+9. END-TO-END USER JOURNEYS
+================================================================================
+
+9.1 EMPLOYEE JOURNEY
+────────────────────
+  Login → Dashboard (my Goal Sheet status)
+    → [May] Create/edit goals until valid → Submit
+    → [If returned] Fix → Resubmit
+    → [If approved] View locked sheet
+    → [Jul/Oct/Jan/Mar-Apr] Open check-in → Enter actuals + status
+    → View computed progress scores
+    → [If shared KPI recipient] Adjust weightage only; actuals from primary owner
+
+9.2 MANAGER (L1) JOURNEY
+────────────────────────
+  Login → Team dashboard (submission status per report)
+    → [May] Review submitted sheets → Edit inline / Approve / Return
+    → [Optional] Push shared KPI to team
+    → [Each quarter] Open check-in → Planned vs actual per report
+    → Add structured comment → Mark check-in done
+    → Monitor who has not completed updates
+
+9.3 ADMIN / HR JOURNEY
+──────────────────────
+  Login → Admin console
+    → Configure annual cycle & window dates
+    → Manage org hierarchy (employee ↔ manager L1)
+    → Manage thrust areas / master data
+    → Push shared KPIs
+    → Unlock locked goals (exception)
+    → View audit logs
+    → Completion dashboard
+    → Export achievement reports
+
+
+================================================================================
+10. SUGGESTED SCREEN MAP (FOR IMPLEMENTATION)
+================================================================================
+
+  PUBLIC
+    • Landing page (marketing — done)
+    • Login / role selection (demo: Employee | Manager | Admin)
+
+  EMPLOYEE
+    • My Goal Sheet (draft / submitted / locked views)
+    • Add / edit goal row
+    • Quarterly check-in form
+    • My progress summary
+
+  MANAGER
+    • Team overview (cards: pending approval, check-in due, complete)
+    • Approve goal sheet (inline edit table)
+    • Quarterly check-in (employee list → detail)
+    • Push shared KPI (select employees, set primary owner)
+
+  ADMIN
+    • Cycle & window settings
+    • Org hierarchy CRUD
+    • Thrust areas / UoM config
+    • Unlock goal sheet
+    • Audit log viewer
+    • Completion dashboard
+    • Export reports
+
+  SHARED COMPONENTS
+    • Navbar (role-aware)
+    • Validation banner (weightage 100%)
+    • Period gate message ("Q2 check-in opens October 1")
+
+
+================================================================================
+11. DATA ENTITIES (LOGICAL MODEL)
+================================================================================
+
+  User                 id, name, email, role, manager_id
+  Cycle                id, year, phase1_start, q1_start, q2_start, q3_start, q4_start
+  ThrustArea           id, name
+  GoalSheet            id, employee_id, cycle_id, status, submitted_at, approved_at
+  Goal                 id, sheet_id, thrust_area_id, title, description,
+                       uom_type, uom_direction (min|max|null), target, weightage,
+                       is_shared, shared_source_id, primary_owner_id, locked
+  CheckIn              id, goal_id, period, actual, status, progress_score,
+                       employee_updated_at
+  ManagerComment       id, employee_id, manager_id, period, comment, created_at
+  AuditLog             id, entity, entity_id, user_id, action, old_value, new_value, at
+  SharedGoalLink       id, source_goal_id, recipient_goal_id, primary_owner_id
+
+
+================================================================================
+12. BUSINESS RULES CHECKLIST (MUST PASS FOR SUBMISSION)
+================================================================================
+
+  [ ] Total weightage = 100% on submit
+  [ ] Each goal weightage ≥ 10%
+  [ ] Max 8 goals per employee
+  [ ] Goals lock on manager approval
+  [ ] Employee cannot edit locked goals without admin unlock
+  [ ] Manager can inline-edit during approval only
+  [ ] Shared goal: title/target read-only for recipients; weightage editable
+  [ ] Shared goal: primary owner actuals sync to all links
+  [ ] Quarterly windows enforced (Phase 1 May; Q1–Q4 per schedule)
+  [ ] Progress scores auto-calculated per UoM table
+  [ ] Achievement export planned vs actual
+  [ ] Audit log for post-lock changes
+  [ ] Three roles with differentiated access
+
+
+================================================================================
+13. EVALUATION CRITERIA (COMPETITION — SECTION 6)
+================================================================================
+
+  1. Functionality     — E2E: create → approve → check-in without errors
+  2. BRD adherence     — All Phase 1 & 2 rules (especially validation)
+  3. User friendliness — Clear UX, helpful errors, consistent per role
+  4. Bugs              — Stable under normal and edge inputs
+  5. Good-to-haves     — Section 5 bonus features (if implemented)
+  6. Cost optimisation — Sensible stack, efficient APIs, hosting awareness
+
+
+================================================================================
+14. RECOMMENDED BUILD ORDER
+================================================================================
+
+  1. Auth + role routing (mock users OK for demo)
+  2. Goal Sheet CRUD + validation (Phase 1 employee)
+  3. Submit / approve / return / lock (Phase 1 manager)
+  4. Period gating service (calendar windows)
+  5. Check-in forms + progress score engine (Phase 2)
+  6. Manager comments + team dashboard
+  7. Shared goals + sync
+  8. Admin: unlock, audit, export, completion dashboard
+  9. Polish landing → app navigation (Get started → Login)
+
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================
