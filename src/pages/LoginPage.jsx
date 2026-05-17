@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { LogoMark, Check } from '../components/landing/icons'
+import ThemeToggle from '../components/shared/ThemeToggle'
 import { useAuth } from '../context/AuthContext'
 import {
   DEMO_USERS,
@@ -141,30 +142,36 @@ export default function LoginPage() {
 
       {/* Right panel — form */}
       <div className="mesh-bg flex flex-1 flex-col">
-        <header className="flex items-center justify-between px-4 py-4 sm:px-6 lg:hidden">
-          <Link to="/" className="flex items-center gap-2 font-semibold text-ink-900">
+        <header className="flex items-center justify-between gap-2 px-4 py-4 sm:px-6 lg:hidden">
+          <Link to="/" className="flex items-center gap-2 font-semibold text-ink-900 dark:text-slate-100">
             <LogoMark />
             <span>
               Goal<span className="text-brand-600">Flow</span>
             </span>
           </Link>
-          <Link
-            to="/"
-            className="text-sm font-medium text-ink-600 hover:text-brand-700"
-          >
-            ← Home
-          </Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Link
+              to="/"
+              className="text-sm font-medium text-ink-600 hover:text-brand-700 dark:text-slate-400"
+            >
+              ← Home
+            </Link>
+          </div>
         </header>
 
         <div className="flex flex-1 items-center justify-center px-4 py-8 sm:px-6">
           <div className="w-full max-w-md">
             <div className="mb-8 hidden lg:block">
-              <Link
-                to="/"
-                className="text-sm font-medium text-ink-500 transition-colors hover:text-brand-700"
-              >
-                ← Back to home
-              </Link>
+              <div className="flex items-center justify-between gap-3">
+                <Link
+                  to="/"
+                  className="text-sm font-medium text-ink-500 transition-colors hover:text-brand-700 dark:text-slate-400"
+                >
+                  ← Back to home
+                </Link>
+                <ThemeToggle />
+              </div>
               <h2 className="mt-4 font-display text-3xl font-semibold text-ink-950">
                 Welcome back
               </h2>

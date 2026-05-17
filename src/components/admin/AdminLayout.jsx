@@ -13,6 +13,7 @@ import { useAdminData } from '../../hooks/useAdminData'
 import BellButton from '../shared/BellButton'
 import NotificationDrawer from '../shared/NotificationDrawer'
 import ResetDemoDialog from './ResetDemoDialog'
+import ThemeToggle from '../shared/ThemeToggle'
 
 const mainNav = [
   { to: '/admin', end: true, label: 'Dashboard', short: 'Home' },
@@ -45,11 +46,11 @@ function NavBadge({ count }) {
 function SidebarNav({ user, unread, onNavigate, onResetDemo }) {
   return (
     <>
-      <div className="border-b border-slate-100 p-5">
+      <div className="border-b border-slate-100 p-5 dark:border-slate-800">
         <NavLink
           to="/admin"
           onClick={onNavigate}
-          className="flex items-center gap-2 font-semibold text-ink-900"
+          className="flex items-center gap-2 font-semibold text-ink-900 dark:text-slate-100"
         >
           <LogoMark className="h-8 w-8" />
           <span>
@@ -59,7 +60,6 @@ function SidebarNav({ user, unread, onNavigate, onResetDemo }) {
         <p className="mt-3 text-xs font-semibold uppercase tracking-wider text-teal-700">
           {ROLE_LABELS.admin}
         </p>
-        <p className="mt-1 truncate text-sm font-medium text-ink-800">{user?.name}</p>
       </div>
 
       <nav className="flex-1 space-y-0.5 overflow-y-auto p-3" aria-label="Admin navigation">
@@ -73,7 +73,7 @@ function SidebarNav({ user, unread, onNavigate, onResetDemo }) {
               `flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                 isActive
                   ? 'bg-teal-600 text-white shadow-sm'
-                  : 'text-ink-600 hover:bg-slate-100 hover:text-ink-900'
+                  : 'text-ink-600 hover:bg-slate-100 hover:text-ink-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
               }`
             }
           >
@@ -142,8 +142,8 @@ export default function AdminLayout() {
   const bottomNav = mainNav.slice(0, 5)
 
   return (
-    <div className="flex min-h-svh bg-slate-100">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-slate-200 bg-white shadow-sm md:flex">
+    <div className="flex min-h-svh bg-slate-100 dark:bg-slate-950">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 md:flex">
         <div className="flex min-h-0 flex-1 flex-col">
           <SidebarNav
             user={user}
@@ -173,7 +173,7 @@ export default function AdminLayout() {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-slate-200 bg-white shadow-xl transition-transform md:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-slate-200 bg-white shadow-xl transition-transform dark:border-slate-800 dark:bg-slate-900 md:hidden ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -203,7 +203,7 @@ export default function AdminLayout() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col md:pl-60">
-        <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-slate-200 bg-white px-4 py-3 shadow-sm">
+        <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <button
             type="button"
             className="rounded-lg border border-slate-200 p-2 text-ink-700 md:hidden"
@@ -218,6 +218,7 @@ export default function AdminLayout() {
             <p className="truncate text-sm font-semibold text-ink-900">{user?.name}</p>
             <p className="text-xs text-ink-500">Admin / HR console · FY26</p>
           </div>
+          <ThemeToggle />
           <BellButton
             unread={unread}
             onClick={() => setDrawerOpen(true)}
@@ -233,7 +234,7 @@ export default function AdminLayout() {
         </header>
 
         <nav
-          className="fixed bottom-0 left-0 right-0 z-20 flex border-t border-slate-200 bg-white md:hidden"
+          className="fixed bottom-0 left-0 right-0 z-20 flex border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 md:hidden"
           aria-label="Admin quick nav"
         >
           {bottomNav.map(({ to, end, short }) => (

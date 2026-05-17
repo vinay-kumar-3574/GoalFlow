@@ -12,6 +12,7 @@ import {
 import { useEmployeeData } from '../../hooks/useEmployeeData'
 import BellButton from '../shared/BellButton'
 import NotificationDrawer from '../shared/NotificationDrawer'
+import ThemeToggle from '../shared/ThemeToggle'
 
 const mainNav = [
   { to: '/employee', end: true, label: 'Overview', short: 'Home' },
@@ -19,16 +20,17 @@ const mainNav = [
   { to: '/employee/shared-goals', end: false, label: 'Shared Goals', short: 'Shared' },
   { to: '/employee/check-in', end: false, label: 'Quarterly Check-in', short: 'Check-in' },
   { to: '/employee/progress', end: false, label: 'My Progress', short: 'Progress' },
+  { to: '/employee/profile', end: false, label: 'Profile', short: 'Profile' },
 ]
 
 function SidebarNav({ user, sheet, unread, onNavigate, onOpenNotifications }) {
   return (
     <>
-      <div className="border-b border-slate-100 p-5">
+      <div className="border-b border-slate-100 p-5 dark:border-slate-800">
         <NavLink
           to="/employee"
           onClick={onNavigate}
-          className="flex items-center gap-2 font-semibold text-ink-900"
+          className="flex items-center gap-2 font-semibold text-ink-900 dark:text-slate-100"
         >
           <LogoMark className="h-8 w-8" />
           <span>
@@ -38,9 +40,8 @@ function SidebarNav({ user, sheet, unread, onNavigate, onOpenNotifications }) {
         <p className="mt-3 text-xs font-semibold uppercase tracking-wider text-brand-600">
           {ROLE_LABELS.employee}
         </p>
-        <p className="mt-1 truncate text-sm font-medium text-ink-800">{user?.name}</p>
         {sheet && (
-          <p className="mt-2 rounded-lg bg-brand-50 px-2.5 py-1.5 text-xs font-medium text-brand-800">
+          <p className="mt-2 rounded-lg bg-brand-50 px-2.5 py-1.5 text-xs font-medium text-brand-800 dark:bg-brand-900/30 dark:text-brand-200">
             {SHEET_STATUS_LABELS[sheet.status] || sheet.status}
           </p>
         )}
@@ -57,7 +58,7 @@ function SidebarNav({ user, sheet, unread, onNavigate, onOpenNotifications }) {
               `block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                 isActive
                   ? 'bg-brand-600 text-white shadow-sm'
-                  : 'text-ink-600 hover:bg-slate-100 hover:text-ink-900'
+                  : 'text-ink-600 hover:bg-slate-100 hover:text-ink-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
               }`
             }
           >
@@ -121,8 +122,8 @@ export default function EmployeeLayout() {
   const openDrawer = () => setDrawerOpen(true)
 
   return (
-    <div className="flex min-h-svh bg-slate-100">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-slate-200 bg-white shadow-sm md:flex md:flex-col">
+    <div className="flex min-h-svh bg-slate-100 dark:bg-slate-950">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 md:flex md:flex-col">
         <SidebarNav user={user} sheet={sheet} unread={unread} onOpenNotifications={openDrawer} />
         <div className="border-t border-slate-100 p-3">
           <button
@@ -145,7 +146,7 @@ export default function EmployeeLayout() {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-slate-200 bg-white shadow-xl transition-transform md:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-slate-200 bg-white shadow-xl transition-transform dark:border-slate-800 dark:bg-slate-900 md:hidden ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -174,7 +175,7 @@ export default function EmployeeLayout() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col md:pl-60">
-        <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-slate-200 bg-white px-4 py-3 shadow-sm">
+        <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <button
             type="button"
             className="rounded-lg border border-slate-200 p-2 text-ink-700 md:hidden"
@@ -189,6 +190,7 @@ export default function EmployeeLayout() {
             <p className="truncate text-sm font-semibold text-ink-900">{user?.name}</p>
             <p className="text-xs text-ink-500">Employee portal</p>
           </div>
+          <ThemeToggle />
           <BellButton unread={unread} onClick={openDrawer} />
           <button
             type="button"
@@ -200,7 +202,7 @@ export default function EmployeeLayout() {
         </header>
 
         <nav
-          className="fixed bottom-0 left-0 right-0 z-20 flex border-t border-slate-200 bg-white md:hidden"
+          className="fixed bottom-0 left-0 right-0 z-20 flex border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 md:hidden"
           aria-label="Employee quick nav"
         >
           {mainNav.slice(0, 4).map(({ to, end, short }) => (

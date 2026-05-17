@@ -31,6 +31,7 @@ import OrgHierarchyPage from './pages/admin/OrgHierarchyPage'
 import AnalyticsPage from './pages/admin/AnalyticsPage'
 import EscalationsPage from './pages/admin/EscalationsPage'
 import AdminNotificationsPage from './pages/admin/AdminNotificationsPage'
+import ProfilePage from './pages/ProfilePage'
 import { ROLES } from './lib/auth'
 
 function App() {
@@ -56,6 +57,7 @@ function App() {
             <Route path="check-in" element={<CheckInPage />} />
             <Route path="progress" element={<ProgressPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
+            <Route path="profile" element={<ProfilePage />} />
           </Route>
 
           <Route
@@ -74,6 +76,7 @@ function App() {
             <Route path="shared-kpi" element={<SharedKpiPage />} />
             <Route path="reports" element={<TeamReportsPage />} />
             <Route path="notifications" element={<ManagerNotificationsPage />} />
+            <Route path="profile" element={<ProfilePage />} />
           </Route>
 
           <Route
@@ -96,6 +99,7 @@ function App() {
             <Route path="escalations" element={<EscalationsPage />} />
             <Route path="notifications" element={<AdminNotificationsPage />} />
             <Route path="master-data" element={<Navigate to="/admin/org" replace />} />
+            <Route path="profile" element={<ProfilePage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
