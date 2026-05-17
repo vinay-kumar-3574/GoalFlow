@@ -8,6 +8,7 @@ import {
   simulateEscalationCheck,
 } from '../../lib/adminEscalations'
 import { addAdminNotification } from '../../lib/adminNotifications'
+import EmptyState from '../../components/shared/EmptyState'
 
 export default function EscalationsPage() {
   const [rules, setRules] = useState(() => getEscalationRules())
@@ -161,7 +162,12 @@ export default function EscalationsPage() {
           </tbody>
         </table>
         {log.length === 0 && (
-          <p className="p-6 text-center text-sm text-ink-500">No escalations yet. Run simulate check.</p>
+          <EmptyState
+            icon="inbox"
+            className="border-0"
+            title="No escalations yet"
+            description="Run a simulate check to evaluate escalation rules against the current org data."
+          />
         )}
       </section>
     </div>

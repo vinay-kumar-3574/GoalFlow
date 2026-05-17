@@ -6,6 +6,7 @@ import { getCheckInDeadline, isCheckInWindowActive, isPeriodWindowOpen } from '.
 import { computeWeightedTotal } from '../../lib/progressScore'
 import { getCheckInStatusLabel } from '../../lib/managerTeamStats'
 import { useManagerTeam } from '../../hooks/useManagerTeam'
+import EmptyState from '../../components/shared/EmptyState'
 
 const periodKeys = [PERIODS.q1, PERIODS.q2, PERIODS.q3, PERIODS.q4]
 
@@ -62,20 +63,25 @@ export default function TeamCheckInPage() {
 
       <ul className="mt-6 space-y-3">
         {locked.length === 0 && (
-          <li className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-ink-500">
-            No locked sheets yet — approve goal sheets first.
+          <li>
+            <EmptyState
+              icon="target"
+              title="No team check-ins yet"
+              description="Approve and lock goal sheets for your direct reports to start quarterly check-ins."
+            />
           </li>
         )}
         {locked.map(({ email, data }) => {
           const profile = team.find((t) => t.email === email)
+          const marked = isCheckInComplete(email, activePeriod)
           let status = getCheckInStatusLabel(data, user?.email, email, activePeriod)
           const windowClosed = !isPeriodWindowOpen(activePeriod, true)
-          if (windowClosed && status !== 'Complete') {
+          const isComplete = marked || status === 'Complete'
+          if (windowClosed && !isComplete) {
             status = 'Overdue'
           }
           const periodData = data.checkIns?.[activePeriod] || {}
           const { weightedScore } = computeWeightedTotal(data.sheet.goals, periodData)
-          const marked = isCheckInComplete(email, activePeriod)
 
           return (
             <li

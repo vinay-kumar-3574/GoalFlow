@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { SkeletonTableRows } from '../../components/ui/Skeleton'
+import EmptyState from '../../components/shared/EmptyState'
 import { useDelayedLoading } from '../../hooks/useDelayedLoading'
 import { useAuth } from '../../context/AuthContext'
 import { SHEET_STATUS } from '../../constants/goals'
@@ -67,9 +68,12 @@ export default function ApprovalsPage() {
           <SkeletonTableRows rows={4} />
         </div>
       ) : filtered.length === 0 ? (
-        <p className="mt-8 rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-ink-500">
-          No employees in this filter.
-        </p>
+        <EmptyState
+          className="mt-8"
+          icon="inbox"
+          title="No approvals in this filter"
+          description="Submitted goal sheets from your direct reports will appear here for review."
+        />
       ) : (
         <ul className="mt-6 space-y-3">
           {filtered.map(({ email, data }) => {

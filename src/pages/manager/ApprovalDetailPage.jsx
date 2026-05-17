@@ -213,7 +213,7 @@ export default function ApprovalDetailPage() {
             <DialogTitle>Approve goal sheet</DialogTitle>
             <DialogDescription>
               Approve all goals for <strong>{profile.name}</strong>? This will lock their goal
-              sheet.
+              sheet permanently.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -229,7 +229,7 @@ export default function ApprovalDetailPage() {
               onClick={handleApprove}
               className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white"
             >
-              Confirm approval
+              Confirm
             </button>
           </DialogFooter>
         </DialogContent>

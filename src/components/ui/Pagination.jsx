@@ -5,7 +5,9 @@ export function Pagination({ page, totalPages, onPageChange }) {
         <button type="button" disabled className="rounded-lg border px-3 py-1 text-sm opacity-40">
           Previous
         </button>
-        <span className="rounded-lg bg-teal-600 px-3 py-1 text-sm font-semibold text-white">1</span>
+        <span className="rounded-lg bg-indigo-600 px-3 py-1 text-sm font-semibold text-white">
+          1
+        </span>
         <button type="button" disabled className="rounded-lg border px-3 py-1 text-sm opacity-40">
           Next
         </button>
@@ -28,6 +30,7 @@ export function Pagination({ page, totalPages, onPageChange }) {
         disabled={page <= 1}
         onClick={() => onPageChange(page - 1)}
         className="rounded-lg border border-slate-200 px-3 py-1 text-sm disabled:opacity-40"
+        aria-label="Previous page"
       >
         ←
       </button>
@@ -36,9 +39,10 @@ export function Pagination({ page, totalPages, onPageChange }) {
           key={p}
           type="button"
           onClick={() => onPageChange(p)}
+          aria-current={p === page ? 'page' : undefined}
           className={`min-w-[2rem] rounded-lg px-3 py-1 text-sm font-medium ${
             p === page
-              ? 'bg-teal-600 text-white'
+              ? 'bg-indigo-600 text-white'
               : 'border border-slate-200 text-ink-700 hover:bg-slate-50'
           }`}
         >
@@ -50,6 +54,7 @@ export function Pagination({ page, totalPages, onPageChange }) {
         disabled={page >= totalPages}
         onClick={() => onPageChange(page + 1)}
         className="rounded-lg border border-slate-200 px-3 py-1 text-sm disabled:opacity-40"
+        aria-label="Next page"
       >
         →
       </button>

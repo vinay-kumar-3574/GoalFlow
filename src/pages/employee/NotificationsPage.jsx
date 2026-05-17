@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { getNotifications, markAllRead, saveNotifications } from '../../lib/notifications'
+import EmptyState from '../../components/shared/EmptyState'
 
 export default function NotificationsPage() {
   const { user } = useAuth()
@@ -38,6 +39,14 @@ export default function NotificationsPage() {
         )}
       </div>
 
+      {list.length === 0 ? (
+        <EmptyState
+          className="mt-6"
+          icon="inbox"
+          title="No notifications"
+          description="Goal sheet updates, check-in windows, and shared KPI alerts will show up here."
+        />
+      ) : (
       <ul className="mt-6 space-y-3">
         {list.map((n) => (
           <li
@@ -69,6 +78,7 @@ export default function NotificationsPage() {
           </li>
         ))}
       </ul>
+      )}
     </div>
   )
 }

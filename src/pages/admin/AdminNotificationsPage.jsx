@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import EmptyState from '../../components/shared/EmptyState'
 import {
   getAdminNotifications,
   markAdminNotificationRead,
@@ -39,6 +40,14 @@ export default function AdminNotificationsPage() {
         </button>
       </div>
 
+      {list.length === 0 ? (
+        <EmptyState
+          className="mt-8"
+          icon="inbox"
+          title="No notifications"
+          description="Escalations, unlock confirmations, cycle changes, and exports will be listed here."
+        />
+      ) : (
       <ul className="mt-8 space-y-2">
         {list.map((n) => (
           <li
@@ -72,9 +81,6 @@ export default function AdminNotificationsPage() {
           </li>
         ))}
       </ul>
-
-      {list.length === 0 && (
-        <p className="mt-8 text-center text-sm text-ink-500">No notifications.</p>
       )}
 
       <section className="mt-10 rounded-xl border border-dashed border-slate-200 p-4 text-xs text-ink-500">

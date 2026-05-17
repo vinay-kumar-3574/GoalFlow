@@ -9,6 +9,7 @@ import {
   paginateLogs,
 } from '../../lib/auditLog'
 import { Pagination } from '../../components/ui/Pagination'
+import EmptyState from '../../components/shared/EmptyState'
 import { getDepartments } from '../../lib/adminStorage'
 
 const ACTION_OPTIONS = [
@@ -145,7 +146,12 @@ export default function AuditLogPage() {
           </tbody>
         </table>
             {items.length === 0 && (
-              <p className="p-8 text-center text-sm text-ink-500">No entries match filters.</p>
+              <EmptyState
+                icon="inbox"
+                className="border-0"
+                title="No audit entries found"
+                description="Actions such as goal submissions, approvals, and check-ins will appear here when they occur."
+              />
             )}
           </>
         )}

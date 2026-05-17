@@ -6,6 +6,7 @@ import { UOM_LABELS } from '../../constants/goals'
 import { useEmployeeData } from '../../hooks/useEmployeeData'
 import { sumWeightage, validateGoalSheet } from '../../lib/goalValidation'
 import SheetStatusBanner from '../../components/employee/SheetStatusBanner'
+import EmptyState from '../../components/shared/EmptyState'
 
 export default function SharedGoalsPage() {
   const { user } = useAuth()
@@ -71,15 +72,19 @@ export default function SharedGoalsPage() {
       )}
 
       {shared.length === 0 ? (
-        <div className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
-          <p className="text-ink-600">No shared goals on your sheet yet.</p>
+        <EmptyState
+          icon="target"
+          className="mt-8"
+          title="No shared goals yet"
+          description="When your manager pushes a departmental KPI, it will appear here for weightage only."
+        >
           <Link
             to="/employee/goals"
-            className="mt-4 inline-block text-sm font-semibold text-brand-700 hover:underline"
+            className="inline-block text-sm font-semibold text-brand-700 hover:underline"
           >
             Go to My Goal Sheet →
           </Link>
-        </div>
+        </EmptyState>
       ) : (
         <ul className="mt-6 space-y-4">
           {shared.map((goal) => (

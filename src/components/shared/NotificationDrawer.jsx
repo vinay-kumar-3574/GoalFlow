@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from '../ui/Sheet'
+import EmptyState from './EmptyState'
 
 export default function NotificationDrawer({
   open,
@@ -57,7 +58,12 @@ export default function NotificationDrawer({
         </SheetHeader>
         <SheetBody>
           {list.length === 0 ? (
-            <p className="text-center text-sm text-ink-500">{emptyMessage}</p>
+            <EmptyState
+              icon="inbox"
+              className="border-0 py-8"
+              title="No notifications"
+              description={emptyMessage}
+            />
           ) : (
             <ul className="space-y-2">
               {list.map((n) => (

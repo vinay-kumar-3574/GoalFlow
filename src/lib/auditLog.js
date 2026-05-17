@@ -17,13 +17,13 @@ export const AUDIT_ACTIONS = {
 }
 
 export const AUDIT_ACTION_LABELS = {
-  [AUDIT_ACTIONS.submitted]: 'Goal submitted',
-  [AUDIT_ACTIONS.approved]: 'Goal approved',
-  [AUDIT_ACTIONS.returned]: 'Goal returned',
-  [AUDIT_ACTIONS.unlock]: 'Goal unlocked',
-  [AUDIT_ACTIONS.shared]: 'Shared goal pushed',
-  [AUDIT_ACTIONS.achievement]: 'Achievement updated',
-  [AUDIT_ACTIONS.comment]: 'Check-in comment added',
+  [AUDIT_ACTIONS.submitted]: 'Goal Submitted',
+  [AUDIT_ACTIONS.approved]: 'Goal Approved',
+  [AUDIT_ACTIONS.returned]: 'Goal Returned',
+  [AUDIT_ACTIONS.unlock]: 'Goal Unlocked',
+  [AUDIT_ACTIONS.shared]: 'Shared Goal Pushed',
+  [AUDIT_ACTIONS.achievement]: 'Achievement Updated',
+  [AUDIT_ACTIONS.comment]: 'Check-in Comment Added',
   [AUDIT_ACTIONS.cycle]: 'Cycle window opened/closed',
   [AUDIT_ACTIONS.employee]: 'Employee added/deactivated',
   [AUDIT_ACTIONS.role]: 'Role changed',

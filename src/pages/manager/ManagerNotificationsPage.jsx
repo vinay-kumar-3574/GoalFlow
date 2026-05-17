@@ -5,6 +5,7 @@ import {
   markAllManagerNotificationsRead,
 } from '../../lib/managerNotifications'
 import { useState } from 'react'
+import EmptyState from '../../components/shared/EmptyState'
 
 export default function ManagerNotificationsPage() {
   const { user } = useAuth()
@@ -28,6 +29,14 @@ export default function ManagerNotificationsPage() {
       </div>
       <p className="mt-1 text-sm text-ink-600">Manager alerts for your direct reports only.</p>
 
+      {list.length === 0 ? (
+        <EmptyState
+          className="mt-6"
+          icon="inbox"
+          title="No notifications"
+          description="Submissions, check-in reminders, and escalations for your team will appear here."
+        />
+      ) : (
       <ul className="mt-6 space-y-3">
         {list.map((n) => (
           <li
@@ -59,6 +68,7 @@ export default function ManagerNotificationsPage() {
           </li>
         ))}
       </ul>
+      )}
     </div>
   )
 }
