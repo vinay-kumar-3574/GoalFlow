@@ -10,6 +10,8 @@ import { addNotification } from './notifications'
 import { addManagerNotification } from './managerNotifications'
 import { registerSharedKpi } from './sharedGoalSync'
 import { getEmployeeDisplay, getTeamForManager, MANAGER_EMAIL } from './org'
+import { appendAuditLog, AUDIT_ACTIONS } from './auditLog'
+import { auditMetaForEmployee } from './auditHelpers'
 
 const MANAGER_DATA_KEY = 'goalflow_manager_data'
 
@@ -81,6 +83,23 @@ export function appendManagerComment(managerEmail, employeeEmail, period, text, 
   })
   store[managerEmail] = record
   saveManagerStore(store)
+
+  const meta = auditMetaForEmployee(employeeEmail)
+  appendAuditLog({
+    userId: managerEmail,
+    userName: managerName || 'Manager',
+    role: 'manager',
+    action: AUDIT_ACTIONS.comment,
+    entity: 'CheckIn',
+    entityId: employeeEmail,
+    goalTitle: `${period.toUpperCase()} check-in`,
+    field: 'comment',
+    oldValue: '—',
+    newValue: 'added',
+    note: trimmed.slice(0, 120),
+    department: meta.department,
+  })
+
   return { ok: true, entry: bucket.thread[bucket.thread.length - 1] }
 }
 
@@ -174,6 +193,22 @@ export function managerApproveSheet(employeeEmail, managerEmail, managerName) {
     body: `${managerName || 'Your manager'} approved and locked your FY26 goal sheet.`,
   })
 
+  const meta = auditMetaForEmployee(employeeEmail)
+  appendAuditLog({
+    userId: managerEmail,
+    userName: managerName || 'Manager',
+    role: 'manager',
+    action: AUDIT_ACTIONS.approved,
+    entity: 'GoalSheet',
+    entityId: employeeEmail,
+    goalTitle: meta.goalTitle,
+    field: 'status',
+    oldValue: 'submitted',
+    newValue: 'locked',
+    note: 'Goals approved and locked',
+    department: meta.department,
+  })
+
   return { ok: true, data }
 }
 
@@ -199,6 +234,22 @@ export function managerReturnSheet(employeeEmail, reason, managerEmail, managerN
   addNotification(employeeEmail, {
     title: 'Goal sheet returned for rework',
     body: `${managerName || 'Your manager'}: ${trimmed}`,
+  })
+
+  const meta = auditMetaForEmployee(employeeEmail)
+  appendAuditLog({
+    userId: managerEmail,
+    userName: managerName || 'Manager',
+    role: 'manager',
+    action: AUDIT_ACTIONS.returned,
+    entity: 'GoalSheet',
+    entityId: employeeEmail,
+    goalTitle: meta.goalTitle,
+    field: 'status',
+    oldValue: 'submitted',
+    newValue: 'returned',
+    note: trimmed,
+    department: meta.department,
   })
 
   return { ok: true, data }
@@ -236,6 +287,8 @@ export function pushSharedKpiToTeam({
   uomType,
   uomDirection,
   weightageByEmail,
+  managerEmail,
+  managerName,
 }) {
   const sharedFrom = `mgr-kpi-${Date.now()}`
   const results = []
@@ -285,6 +338,24 @@ export function pushSharedKpiToTeam({
       body: `Departmental KPI "${title}" added to your sheet — review weightage.`,
     })
     results.push({ email, ok: true })
+  }
+
+  const pushed = results.filter((r) => r.ok).length
+  if (pushed > 0 && managerEmail) {
+    appendAuditLog({
+      userId: managerEmail,
+      userName: managerName || 'Manager',
+      role: 'manager',
+      action: AUDIT_ACTIONS.shared,
+      entity: 'SharedKPI',
+      entityId: sharedFrom,
+      goalTitle: title,
+      field: 'recipients',
+      oldValue: '—',
+      newValue: `${pushed} employee(s)`,
+      note: `Primary owner: ${primaryOwnerEmail}`,
+      department: '—',
+    })
   }
 
   return results

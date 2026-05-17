@@ -44,8 +44,24 @@ export function getUnreadCount(email) {
   return getNotifications(email).filter((n) => !n.read).length
 }
 
+export function markNotificationRead(email, id) {
+  const list = getNotifications(email).map((n) =>
+    n.id === id ? { ...n, read: true } : n,
+  )
+  saveNotifications(email, list)
+  return list
+}
+
 export function markAllRead(email) {
   const list = getNotifications(email).map((n) => ({ ...n, read: true }))
+  saveNotifications(email, list)
+  return list
+}
+
+export function toggleNotificationRead(email, id) {
+  const list = getNotifications(email).map((n) =>
+    n.id === id ? { ...n, read: !n.read } : n,
+  )
   saveNotifications(email, list)
   return list
 }

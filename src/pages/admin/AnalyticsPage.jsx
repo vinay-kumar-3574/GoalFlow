@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   LineChart,
   Line,
@@ -38,6 +38,49 @@ export default function AnalyticsPage() {
   const statusQ = getStatusBreakdownByQuarter()
   const heatmap = getCompletionHeatmap()
   const managers = getManagerEffectiveness(period)
+  const [sortKey, setSortKey] = useState('checkInRate')
+  const [sortDir, setSortDir] = useState('desc')
+
+  const sortedManagers = useMemo(() => {
+    const copy = [...managers]
+    copy.sort((a, b) => {
+      const av = a[sortKey]
+      const bv = b[sortKey]
+      if (typeof av === 'string') {
+        return sortDir === 'asc'
+          ? av.localeCompare(bv)
+          : bv.localeCompare(av)
+      }
+      return sortDir === 'asc' ? av - bv : bv - av
+    })
+    return copy
+  }, [managers, sortKey, sortDir])
+
+  function toggleSort(key) {
+    if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+    else {
+      setSortKey(key)
+      setSortDir('desc')
+    }
+  }
+
+  function SortTh({ label, col, className = '' }) {
+    const active = sortKey === col
+    return (
+      <th className={`px-3 py-2 ${className}`}>
+        <button
+          type="button"
+          onClick={() => toggleSort(col)}
+          className="inline-flex items-center gap-1 font-semibold uppercase hover:text-ink-800"
+        >
+          {label}
+          <span className="text-[10px] text-teal-700">
+            {active ? (sortDir === 'asc' ? '↑' : '↓') : '↕'}
+          </span>
+        </button>
+      </th>
+    )
+  }
 
   return (
     <div className="mx-auto max-w-6xl space-y-10">
@@ -176,15 +219,15 @@ export default function AnalyticsPage() {
         <table className="mt-4 w-full text-left text-sm">
           <thead>
             <tr className="border-b text-xs uppercase text-ink-500">
-              <th className="px-3 py-2">Manager</th>
-              <th className="px-3 py-2">Team</th>
-              <th className="px-3 py-2">Done</th>
-              <th className="px-3 py-2">Rate %</th>
-              <th className="px-3 py-2">Avg score %</th>
+              <SortTh label="Manager" col="managerName" className="text-left" />
+              <SortTh label="Team" col="teamSize" />
+              <SortTh label="Done" col="checkInsDone" />
+              <SortTh label="Rate %" col="checkInRate" />
+              <SortTh label="Avg score %" col="avgTeamScore" />
             </tr>
           </thead>
           <tbody>
-            {managers.map((m) => (
+            {sortedManagers.map((m) => (
               <tr key={m.managerEmail} className="border-b border-slate-50">
                 <td className="px-3 py-2 font-medium">{m.managerName}</td>
                 <td className="px-3 py-2">{m.teamSize}</td>

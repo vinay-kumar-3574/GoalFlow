@@ -86,6 +86,7 @@ export default function ManagerGoalReviewTable({ goals, editable, onUpdateGoal }
                             }
                           }}
                           onTab={() => weightIdx >= 0 && focusCell(weightIdx)}
+                          toastLabel="Target updated"
                         />
                       </span>
                     ) : (
@@ -105,6 +106,7 @@ export default function ManagerGoalReviewTable({ goals, editable, onUpdateGoal }
                           type="number"
                           onSave={(v) => saveField(goal.id, 'weightage', v)}
                           onTab={() => focusCell(targetIdx + 1)}
+                          toastLabel="Weightage updated"
                         />
                       </span>
                     ) : (

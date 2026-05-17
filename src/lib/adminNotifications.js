@@ -53,13 +53,23 @@ export function addAdminNotification({ type, title, body }) {
 }
 
 export function markAdminNotificationRead(id) {
-  const list = getAdminNotifications()
-  const n = list.find((x) => x.id === id)
-  if (n) n.read = true
+  const list = getAdminNotifications().map((n) =>
+    n.id === id ? { ...n, read: true } : n,
+  )
   save(list)
+  return list
 }
 
 export function markAllAdminNotificationsRead() {
   const list = getAdminNotifications().map((n) => ({ ...n, read: true }))
   save(list)
+  return list
+}
+
+export function toggleAdminNotificationRead(id) {
+  const list = getAdminNotifications().map((n) =>
+    n.id === id ? { ...n, read: !n.read } : n,
+  )
+  save(list)
+  return list
 }

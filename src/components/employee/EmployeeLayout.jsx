@@ -1,11 +1,17 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { LogoMark } from '../landing/icons'
 import { useAuth } from '../../context/AuthContext'
 import { ROLE_LABELS } from '../../lib/auth'
 import { SHEET_STATUS_LABELS } from '../../constants/goals'
-import { getUnreadCount } from '../../lib/notifications'
+import {
+  getNotifications,
+  markAllRead,
+  toggleNotificationRead,
+} from '../../lib/notifications'
 import { useEmployeeData } from '../../hooks/useEmployeeData'
+import BellButton from '../shared/BellButton'
+import NotificationDrawer from '../shared/NotificationDrawer'
 
 const mainNav = [
   { to: '/employee', end: true, label: 'Overview', short: 'Home' },
@@ -15,7 +21,7 @@ const mainNav = [
   { to: '/employee/progress', end: false, label: 'My Progress', short: 'Progress' },
 ]
 
-function SidebarNav({ user, sheet, unread, onNavigate }) {
+function SidebarNav({ user, sheet, unread, onNavigate, onOpenNotifications }) {
   return (
     <>
       <div className="border-b border-slate-100 p-5">
@@ -61,16 +67,10 @@ function SidebarNav({ user, sheet, unread, onNavigate }) {
       </nav>
 
       <div className="border-t border-slate-100 p-3">
-        <NavLink
-          to="/employee/notifications"
-          onClick={onNavigate}
-          className={({ isActive }) =>
-            `flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium ${
-              isActive
-                ? 'bg-brand-600 text-white'
-                : 'text-ink-600 hover:bg-slate-100'
-            }`
-          }
+        <button
+          type="button"
+          onClick={onOpenNotifications}
+          className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-ink-600 hover:bg-slate-100"
         >
           Notifications
           {unread > 0 && (
@@ -78,7 +78,7 @@ function SidebarNav({ user, sheet, unread, onNavigate }) {
               {unread}
             </span>
           )}
-        </NavLink>
+        </button>
       </div>
     </>
   )
@@ -89,19 +89,41 @@ export default function EmployeeLayout() {
   const navigate = useNavigate()
   const { sheet } = useEmployeeData(user?.email)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const unread = user?.email ? getUnreadCount(user.email) : 0
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [notifications, setNotifications] = useState([])
+
+  useEffect(() => {
+    if (user?.email) setNotifications(getNotifications(user.email))
+  }, [user?.email, drawerOpen])
+
+  const unread = notifications.filter((n) => !n.read).length
 
   function handleLogout() {
     logout()
     navigate('/login', { replace: true })
   }
 
+  function handleToggleRead(id) {
+    if (!user?.email) return notifications
+    const next = toggleNotificationRead(user.email, id)
+    setNotifications(next)
+    return next
+  }
+
+  function handleMarkAllRead() {
+    if (!user?.email) return notifications
+    const next = markAllRead(user.email)
+    setNotifications(next)
+    return next
+  }
+
   const closeMobile = () => setMobileOpen(false)
+  const openDrawer = () => setDrawerOpen(true)
 
   return (
     <div className="flex min-h-svh bg-slate-100">
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-slate-200 bg-white shadow-sm md:flex md:flex-col">
-        <SidebarNav user={user} sheet={sheet} unread={unread} />
+        <SidebarNav user={user} sheet={sheet} unread={unread} onOpenNotifications={openDrawer} />
         <div className="border-t border-slate-100 p-3">
           <button
             type="button"
@@ -127,7 +149,16 @@ export default function EmployeeLayout() {
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <SidebarNav user={user} sheet={sheet} unread={unread} onNavigate={closeMobile} />
+        <SidebarNav
+          user={user}
+          sheet={sheet}
+          unread={unread}
+          onNavigate={closeMobile}
+          onOpenNotifications={() => {
+            closeMobile()
+            openDrawer()
+          }}
+        />
         <div className="mt-auto border-t border-slate-100 p-3">
           <button
             type="button"
@@ -158,24 +189,7 @@ export default function EmployeeLayout() {
             <p className="truncate text-sm font-semibold text-ink-900">{user?.name}</p>
             <p className="text-xs text-ink-500">Employee portal</p>
           </div>
-          <NavLink
-            to="/employee/notifications"
-            className="relative rounded-lg p-2 text-ink-600 hover:bg-slate-100 md:hidden"
-            aria-label="Notifications"
-          >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                strokeLinecap="round"
-                strokeWidth={2}
-                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-6-6 6 6 0 00-6 6v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-              />
-            </svg>
-            {unread > 0 && (
-              <span className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
-                {unread}
-              </span>
-            )}
-          </NavLink>
+          <BellButton unread={unread} onClick={openDrawer} />
           <button
             type="button"
             onClick={handleLogout}
@@ -209,6 +223,18 @@ export default function EmployeeLayout() {
           <Outlet />
         </main>
       </div>
+
+      {user?.email && (
+        <NotificationDrawer
+          open={drawerOpen}
+          onOpenChange={setDrawerOpen}
+          title="Notifications"
+          notificationsPath="/employee/notifications"
+          items={notifications}
+          onMarkAllRead={handleMarkAllRead}
+          onToggleRead={handleToggleRead}
+        />
+      )}
     </div>
   )
 }

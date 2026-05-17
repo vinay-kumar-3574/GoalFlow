@@ -16,6 +16,9 @@ import {
   notifyManagerGoalSubmitted,
   notifyManagerResubmitted,
 } from '../lib/managerStorage'
+import { appendAuditLog, AUDIT_ACTIONS } from '../lib/auditLog'
+import { auditMetaForEmployee } from '../lib/auditHelpers'
+import { getEmployeeDisplay } from '../lib/org'
 
 export function useEmployeeData(email) {
   const [data, setData] = useState(() => (email ? getEmployeeData(email) : null))
@@ -97,8 +100,28 @@ export function useEmployeeData(email) {
     })
     if (wasReturned) notifyManagerResubmitted(email)
     else notifyManagerGoalSubmitted(email)
+
+    if (email) {
+      const profile = getEmployeeDisplay(email)
+      const meta = auditMetaForEmployee(email)
+      appendAuditLog({
+        userId: email,
+        userName: profile.name,
+        role: 'employee',
+        action: AUDIT_ACTIONS.submitted,
+        entity: 'GoalSheet',
+        entityId: email,
+        goalTitle: meta.goalTitle,
+        field: 'status',
+        oldValue: wasReturned ? 'returned' : 'draft',
+        newValue: 'submitted',
+        note: wasReturned ? 'Resubmitted after rework' : 'Submitted for manager approval',
+        department: meta.department,
+      })
+    }
+
     return { ok: true }
-  }, [data, persist])
+  }, [data, persist, email])
 
   const saveCheckIn = useCallback(
     (period, goalId, entry) => {

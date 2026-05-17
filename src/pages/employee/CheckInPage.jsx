@@ -12,6 +12,9 @@ import {
   UOM_TYPES,
 } from '../../constants/goals'
 import { canEmployeeCheckIn } from '../../lib/cycle'
+import { appendAuditLog, AUDIT_ACTIONS } from '../../lib/auditLog'
+import { auditMetaForEmployee } from '../../lib/auditHelpers'
+import { getEmployeeDisplay } from '../../lib/org'
 import { computeWeightedTotal } from '../../lib/progressScore'
 import { useEmployeeData } from '../../hooks/useEmployeeData'
 import SheetStatusBanner from '../../components/employee/SheetStatusBanner'
@@ -74,6 +77,24 @@ export default function CheckInPage() {
   }
 
   function handleSaveCheckIn() {
+    if (user?.email) {
+      const profile = getEmployeeDisplay(user.email)
+      const meta = auditMetaForEmployee(user.email)
+      appendAuditLog({
+        userId: user.email,
+        userName: profile.name,
+        role: 'employee',
+        action: AUDIT_ACTIONS.achievement,
+        entity: 'CheckIn',
+        entityId: user.email,
+        goalTitle: `${activePeriod.toUpperCase()} check-in`,
+        field: 'achievement',
+        oldValue: '—',
+        newValue: weightedScore != null ? `${weightedScore}%` : 'saved',
+        note: `Saved ${activePeriod.toUpperCase()} check-in`,
+        department: meta.department,
+      })
+    }
     toast.success('Check-in saved successfully.')
   }
 
@@ -216,6 +237,13 @@ export default function CheckInPage() {
         Save Check-in
       </button>
 
+      <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-500">
+          Status breakdown
+        </h2>
+        <CheckInDonutChart goals={sheet.goals} periodData={periodData} />
+      </section>
+
       <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
         <div className="text-center">
           <p className="text-sm font-medium text-ink-600">Total Weighted Score</p>
@@ -256,13 +284,6 @@ export default function CheckInPage() {
             </tbody>
           </table>
         </div>
-      </section>
-
-      <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-500">
-          Status breakdown
-        </h2>
-        <CheckInDonutChart goals={sheet.goals} periodData={periodData} />
       </section>
     </div>
   )

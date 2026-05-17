@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom'
+import { SkeletonCard } from '../../components/ui/Skeleton'
+import { useDelayedLoading } from '../../hooks/useDelayedLoading'
 import { PERIOD_LABELS } from '../../constants/goals'
 import { useAdminData } from '../../hooks/useAdminData'
 import { getCycleConfig } from '../../lib/adminStorage'
@@ -13,6 +15,7 @@ const quickActions = [
 ]
 
 export default function AdminHomePage() {
+  const loading = useDelayedLoading(300)
   const { stats, period } = useAdminData()
   const cycle = getCycleConfig()
   const escalations = getActiveEscalationCount()
@@ -35,16 +38,26 @@ export default function AdminHomePage() {
       )}
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <Card label="Total Employees" value={stats.totalEmployees} />
-        <Card label="Total Goals Created" value={stats.totalGoalsCreated} />
-        <Card label="Goal Submission Rate" value={`${stats.submissionRate}%`} tone="amber" />
-        <Card label="Approval Rate" value={`${stats.approvalRate}%`} tone="teal" />
-        <Card
-          label="Check-in Completion"
-          value={`${stats.checkInCompletionRate}%`}
-          sub={`Current: ${PERIOD_LABELS[period]?.split(' ')[0] || period}`}
-          tone="green"
-        />
+        {loading ? (
+          <>
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </>
+        ) : (
+          <>
+            <Card label="Total Employees" value={stats.totalEmployees} />
+            <Card label="Total Goals Created" value={stats.totalGoalsCreated} />
+            <Card label="Goal Submission Rate" value={`${stats.submissionRate}%`} tone="amber" />
+            <Card label="Approval Rate" value={`${stats.approvalRate}%`} tone="teal" />
+            <Card
+              label="Check-in Completion"
+              value={`${stats.checkInCompletionRate}%`}
+              sub={`Current: ${PERIOD_LABELS[period]?.split(' ')[0] || period}`}
+              tone="green"
+            />
+          </>
+        )}
       </div>
 
       <div className="mt-8 flex flex-wrap gap-3">

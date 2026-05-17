@@ -51,8 +51,24 @@ export function getManagerUnreadCount(managerEmail) {
   return getManagerNotifications(managerEmail).filter((n) => !n.read).length
 }
 
+export function markManagerNotificationRead(managerEmail, id) {
+  const list = getManagerNotifications(managerEmail).map((n) =>
+    n.id === id ? { ...n, read: true } : n,
+  )
+  saveManagerNotifications(managerEmail, list)
+  return list
+}
+
 export function markAllManagerNotificationsRead(managerEmail) {
   const list = getManagerNotifications(managerEmail).map((n) => ({ ...n, read: true }))
+  saveManagerNotifications(managerEmail, list)
+  return list
+}
+
+export function toggleManagerNotificationRead(managerEmail, id) {
+  const list = getManagerNotifications(managerEmail).map((n) =>
+    n.id === id ? { ...n, read: !n.read } : n,
+  )
   saveManagerNotifications(managerEmail, list)
   return list
 }

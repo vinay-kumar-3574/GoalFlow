@@ -8,6 +8,14 @@ import { isDirectReport } from '../../lib/managerStorage'
 import { useManagerTeam } from '../../hooks/useManagerTeam'
 import ManagerGoalReviewTable from '../../components/manager/ManagerGoalReviewTable'
 import SheetStatusPill from '../../components/manager/SheetStatusPill'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../components/ui/Dialog'
 
 export default function ApprovalDetailPage() {
   const { employeeEmail: param } = useParams()
@@ -24,6 +32,7 @@ export default function ApprovalDetailPage() {
   const [returnMode, setReturnMode] = useState(false)
   const [returnReason, setReturnReason] = useState('')
   const [validationErrors, setValidationErrors] = useState([])
+  const [approveOpen, setApproveOpen] = useState(false)
 
   if (!isDirectReport(user?.email || MANAGER_EMAIL, employeeEmail)) {
     return (
@@ -64,9 +73,11 @@ export default function ApprovalDetailPage() {
     if (!result.ok) {
       setValidationErrors(result.errors || [result.error])
       toast.error(result.error || 'Approval failed')
+      setApproveOpen(false)
       return
     }
     toast.success('Goals approved and locked.')
+    setApproveOpen(false)
     navigate('/manager/approvals')
   }
 
@@ -186,7 +197,7 @@ export default function ApprovalDetailPage() {
             )}
             <button
               type="button"
-              onClick={handleApprove}
+              onClick={() => setApproveOpen(true)}
               disabled={returnMode}
               className="rounded-xl bg-violet-600 px-6 py-3 text-sm font-semibold text-white shadow-md hover:bg-violet-700 disabled:opacity-50"
             >
@@ -195,6 +206,34 @@ export default function ApprovalDetailPage() {
           </div>
         </>
       )}
+
+      <Dialog open={approveOpen} onOpenChange={setApproveOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Approve goal sheet</DialogTitle>
+            <DialogDescription>
+              Approve all goals for <strong>{profile.name}</strong>? This will lock their goal
+              sheet.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <button
+              type="button"
+              onClick={() => setApproveOpen(false)}
+              className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleApprove}
+              className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white"
+            >
+              Confirm approval
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -1,11 +1,18 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { LogoMark } from '../landing/icons'
 import { useAuth } from '../../context/AuthContext'
 import { ROLE_LABELS } from '../../lib/auth'
-import { getAdminUnreadCount } from '../../lib/adminNotifications'
+import {
+  getAdminNotifications,
+  markAllAdminNotificationsRead,
+  toggleAdminNotificationRead,
+} from '../../lib/adminNotifications'
 import { useAdminData } from '../../hooks/useAdminData'
+import BellButton from '../shared/BellButton'
+import NotificationDrawer from '../shared/NotificationDrawer'
+import ResetDemoDialog from './ResetDemoDialog'
 
 const mainNav = [
   { to: '/admin', end: true, label: 'Dashboard', short: 'Home' },
@@ -94,17 +101,40 @@ export default function AdminLayout() {
   const { resetDemo } = useAdminData()
   const navigate = useNavigate()
   const [mobileOpen, setMobileOpen] = useState(false)
-  const unread = getAdminUnreadCount()
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [resetOpen, setResetOpen] = useState(false)
+  const [notifications, setNotifications] = useState(() => getAdminNotifications())
+  const unread = notifications.filter((n) => !n.read).length
+
+  useEffect(() => {
+    setNotifications(getAdminNotifications())
+  }, [drawerOpen])
 
   function handleLogout() {
     logout()
     navigate('/login', { replace: true })
   }
 
-  function handleResetDemo() {
-    if (!window.confirm('Reset all demo data to defaults? This cannot be undone.')) return
+  function openResetDemo() {
+    setResetOpen(true)
+  }
+
+  function confirmResetDemo() {
     resetDemo()
+    setNotifications(getAdminNotifications())
     toast.success('Demo data reset.')
+  }
+
+  function handleToggleRead(id) {
+    const next = toggleAdminNotificationRead(id)
+    setNotifications(next)
+    return next
+  }
+
+  function handleMarkAllRead() {
+    const next = markAllAdminNotificationsRead()
+    setNotifications(next)
+    return next
   }
 
   const closeMobile = () => setMobileOpen(false)
@@ -119,7 +149,7 @@ export default function AdminLayout() {
             user={user}
             unread={unread}
             onNavigate={undefined}
-            onResetDemo={handleResetDemo}
+            onResetDemo={openResetDemo}
           />
         </div>
         <div className="mt-auto border-t border-slate-100 p-3">
@@ -154,7 +184,7 @@ export default function AdminLayout() {
             onNavigate={closeMobile}
             onResetDemo={() => {
               closeMobile()
-              handleResetDemo()
+              openResetDemo()
             }}
           />
         </div>
@@ -188,18 +218,11 @@ export default function AdminLayout() {
             <p className="truncate text-sm font-semibold text-ink-900">{user?.name}</p>
             <p className="text-xs text-ink-500">Admin / HR console · FY26</p>
           </div>
-          <NavLink
-            to="/admin/notifications"
-            className="relative hidden rounded-lg border border-slate-200 p-2 md:block"
-          >
-            <span className="sr-only">Notifications</span>
-            🔔
-            {unread > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
-                {unread}
-              </span>
-            )}
-          </NavLink>
+          <BellButton
+            unread={unread}
+            onClick={() => setDrawerOpen(true)}
+            className="md:inline-flex"
+          />
           <button
             type="button"
             onClick={handleLogout}
@@ -233,6 +256,21 @@ export default function AdminLayout() {
           <Outlet />
         </main>
       </div>
+
+      <NotificationDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        title="Admin notifications"
+        notificationsPath="/admin/notifications"
+        items={notifications}
+        onMarkAllRead={handleMarkAllRead}
+        onToggleRead={handleToggleRead}
+      />
+      <ResetDemoDialog
+        open={resetOpen}
+        onOpenChange={setResetOpen}
+        onConfirm={confirmResetDemo}
+      />
     </div>
   )
 }

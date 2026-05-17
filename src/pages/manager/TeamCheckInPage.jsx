@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { PERIOD_LABELS, PERIODS, SHEET_STATUS } from '../../constants/goals'
-import { getCheckInDeadline, isCheckInWindowActive } from '../../lib/cycle'
+import { getCheckInDeadline, isCheckInWindowActive, isPeriodWindowOpen } from '../../lib/cycle'
 import { computeWeightedTotal } from '../../lib/progressScore'
 import { getCheckInStatusLabel } from '../../lib/managerTeamStats'
 import { useManagerTeam } from '../../hooks/useManagerTeam'
@@ -14,6 +14,7 @@ function StatusBadge({ status }) {
     Complete: 'bg-emerald-100 text-emerald-800',
     Pending: 'bg-amber-100 text-amber-900',
     'Not Started': 'bg-slate-100 text-slate-600',
+    Overdue: 'bg-red-100 text-red-800',
   }
   return (
     <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${map[status]}`}>
@@ -67,7 +68,11 @@ export default function TeamCheckInPage() {
         )}
         {locked.map(({ email, data }) => {
           const profile = team.find((t) => t.email === email)
-          const status = getCheckInStatusLabel(data, user?.email, email, activePeriod)
+          let status = getCheckInStatusLabel(data, user?.email, email, activePeriod)
+          const windowClosed = !isPeriodWindowOpen(activePeriod, true)
+          if (windowClosed && status !== 'Complete') {
+            status = 'Overdue'
+          }
           const periodData = data.checkIns?.[activePeriod] || {}
           const { weightedScore } = computeWeightedTotal(data.sheet.goals, periodData)
           const marked = isCheckInComplete(email, activePeriod)

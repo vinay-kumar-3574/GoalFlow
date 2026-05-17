@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom'
+import { SkeletonCard } from '../../components/ui/Skeleton'
+import { useDelayedLoading } from '../../hooks/useDelayedLoading'
 import { useAuth } from '../../context/AuthContext'
 import { SHEET_STATUS } from '../../constants/goals'
 import { getCheckInDeadline, isCheckInWindowActive } from '../../lib/cycle'
@@ -14,6 +16,7 @@ function scoreClass(tone) {
 }
 
 export default function ManagerHomePage() {
+  const loading = useDelayedLoading(300)
   const { user } = useAuth()
   const { team, members, dashboardStats, activePeriod } = useManagerTeam(
     user?.email,
@@ -36,26 +39,36 @@ export default function ManagerHomePage() {
       )}
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <SummaryCard label="Total team members" value={dashboardStats.totalMembers} />
-        <SummaryCard
-          label="Goals pending approval"
-          value={dashboardStats.pendingApproval}
-          tone="amber"
-          to="/manager/approvals?filter=pending"
-        />
-        <SummaryCard label="Goals approved" value={dashboardStats.approved} tone="green" />
-        <SummaryCard
-          label="Check-ins completed"
-          value={dashboardStats.checkInsCompleted}
-          tone="green"
-          sub={`This quarter (${activePeriod.toUpperCase()})`}
-        />
-        <SummaryCard
-          label="Check-ins pending"
-          value={dashboardStats.checkInsPending}
-          tone="amber"
-          to="/manager/check-in"
-        />
+        {loading ? (
+          <>
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </>
+        ) : (
+          <>
+            <SummaryCard label="Total team members" value={dashboardStats.totalMembers} />
+            <SummaryCard
+              label="Goals pending approval"
+              value={dashboardStats.pendingApproval}
+              tone="amber"
+              to="/manager/approvals?filter=pending"
+            />
+            <SummaryCard label="Goals approved" value={dashboardStats.approved} tone="green" />
+            <SummaryCard
+              label="Check-ins completed"
+              value={dashboardStats.checkInsCompleted}
+              tone="green"
+              sub={`This quarter (${activePeriod.toUpperCase()})`}
+            />
+            <SummaryCard
+              label="Check-ins pending"
+              value={dashboardStats.checkInsPending}
+              tone="amber"
+              to="/manager/check-in"
+            />
+          </>
+        )}
       </div>
 
       <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">

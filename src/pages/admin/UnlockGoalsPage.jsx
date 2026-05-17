@@ -68,6 +68,11 @@ export default function UnlockGoalsPage() {
           placeholder="Mandatory reason before unlock is confirmed…"
           className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
         />
+        <p className={`mt-1 text-xs ${reason.trim().length >= 10 ? 'text-emerald-700' : 'text-amber-700'}`}>
+          {reason.trim().length >= 10
+            ? 'Reason recorded — you can unlock goals below.'
+            : 'Please provide a reason (min 10 characters)'}
+        </p>
       </section>
 
       {lockedEmployees.map((e) => (
@@ -97,6 +102,7 @@ export default function UnlockGoalsPage() {
                     <td className="px-4 py-3">
                       <button
                         type="button"
+                        disabled={reason.trim().length < 10}
                         onClick={() => {
                           setSelected({ email: e.email, goalId: g.id, title: g.title })
                           setConfirm({
@@ -106,7 +112,7 @@ export default function UnlockGoalsPage() {
                             employeeName: e.name,
                           })
                         }}
-                        className="rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-semibold text-white"
+                        className="rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         Unlock
                       </button>

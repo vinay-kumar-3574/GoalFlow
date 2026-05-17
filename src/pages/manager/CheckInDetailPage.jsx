@@ -183,25 +183,6 @@ export default function CheckInDetailPage() {
         </table>
       </div>
 
-      {thread.length > 0 && (
-        <section className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-5">
-          <h2 className="text-sm font-semibold uppercase text-ink-500">
-            Previous check-in comments
-          </h2>
-          <ul className="mt-3 space-y-3">
-            {thread.map((c, i) => (
-              <li key={i} className="rounded-lg border border-slate-200 bg-white p-3 text-sm">
-                <p className="text-ink-800">{c.text}</p>
-                <p className="mt-1 text-xs text-ink-500">
-                  {c.managerName || 'Manager'} · {new Date(c.savedAt).toLocaleString()}
-                </p>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-2 text-xs text-ink-400">Comments cannot be deleted once saved.</p>
-        </section>
-      )}
-
       <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="font-semibold text-ink-900">Add check-in comment</h2>
         <textarea
@@ -229,6 +210,25 @@ export default function CheckInDetailPage() {
           </button>
         </div>
       </section>
+
+      {thread.length > 0 && (
+        <section className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <h2 className="text-sm font-semibold uppercase text-ink-500">
+            Previous check-in comments
+          </h2>
+          <ul className="mt-3 space-y-3">
+            {thread.map((c, i) => (
+              <li key={i} className="rounded-lg border border-slate-200 bg-white p-3 text-sm">
+                <p className="text-ink-800">{c.text}</p>
+                <p className="mt-1 text-xs text-ink-500">
+                  {c.managerName || 'Manager'} · {new Date(c.savedAt).toLocaleString()}
+                </p>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-xs text-ink-400">Comments cannot be deleted once saved.</p>
+        </section>
+      )}
     </div>
   )
 }

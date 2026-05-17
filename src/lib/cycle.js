@@ -44,6 +44,12 @@ export function isCheckInOpen(period) {
   return active.phase === 'checkin' && active.period === period
 }
 
+export function isPeriodWindowOpen(period, demoAllowAll = true) {
+  const config = getCycleConfig()
+  if (config.demoMode || demoAllowAll === true) return true
+  return Boolean(config.windowOpen?.[period])
+}
+
 export function canEmployeeCheckIn(sheetStatus, period, demoAllowAll = true) {
   if (sheetStatus !== SHEET_STATUS.locked) return false
   if (demoAllowAll) return true

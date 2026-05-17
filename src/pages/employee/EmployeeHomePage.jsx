@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom'
+import { SkeletonCard } from '../../components/ui/Skeleton'
+import { useDelayedLoading } from '../../hooks/useDelayedLoading'
 import { useAuth } from '../../context/AuthContext'
 import { PERIODS, SHEET_STATUS } from '../../constants/goals'
 import { sumWeightage } from '../../lib/goalValidation'
@@ -10,6 +12,7 @@ import YearTimelineStrip from '../../components/employee/YearTimelineStrip'
 import OverviewWeightedScore from '../../components/employee/OverviewWeightedScore'
 
 export default function EmployeeHomePage() {
+  const loading = useDelayedLoading(300)
   const { user } = useAuth()
   const { sheet, checkIns } = useEmployeeData(user?.email)
   const totalWeight = sheet ? sumWeightage(sheet.goals) : 0
@@ -54,13 +57,23 @@ export default function EmployeeHomePage() {
       </div>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-3">
-        <StatCard label="Goals on sheet" value={goals.length} sub="Max 8" />
-        <StatCard label="Weightage" value={`${totalWeight}%`} sub="Target 100%" />
-        <StatCard
-          label="Sheet status"
-          value={sheet?.status?.replace('_', ' ') ?? '—'}
-          sub="FY26 cycle"
-        />
+        {loading ? (
+          <>
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </>
+        ) : (
+          <>
+            <StatCard label="Goals on sheet" value={goals.length} sub="Max 8" />
+            <StatCard label="Weightage" value={`${totalWeight}%`} sub="Target 100%" />
+            <StatCard
+              label="Sheet status"
+              value={sheet?.status?.replace('_', ' ') ?? '—'}
+              sub="FY26 cycle"
+            />
+          </>
+        )}
       </div>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

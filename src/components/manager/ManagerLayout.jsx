@@ -1,10 +1,16 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { LogoMark } from '../landing/icons'
 import { useAuth } from '../../context/AuthContext'
 import { ROLE_LABELS } from '../../lib/auth'
-import { getManagerUnreadCount } from '../../lib/managerNotifications'
+import {
+  getManagerNotifications,
+  markAllManagerNotificationsRead,
+  toggleManagerNotificationRead,
+} from '../../lib/managerNotifications'
 import { useManagerTeam } from '../../hooks/useManagerTeam'
+import BellButton from '../shared/BellButton'
+import NotificationDrawer from '../shared/NotificationDrawer'
 
 const mainNav = [
   { to: '/manager', end: true, label: 'Team Dashboard', short: 'Home' },
@@ -29,7 +35,7 @@ function NavBadge({ count }) {
   )
 }
 
-function SidebarNav({ user, pendingCount, unread, onNavigate }) {
+function SidebarNav({ user, pendingCount, unread, onNavigate, onOpenNotifications }) {
   return (
     <>
       <div className="border-b border-slate-100 p-5">
@@ -68,18 +74,14 @@ function SidebarNav({ user, pendingCount, unread, onNavigate }) {
             {badgeKey === 'pending' && <NavBadge count={pendingCount} />}
           </NavLink>
         ))}
-        <NavLink
-          to="/manager/notifications"
-          onClick={onNavigate}
-          className={({ isActive }) =>
-            `flex items-center rounded-lg px-3 py-2.5 text-sm font-medium ${
-              isActive ? 'bg-violet-600 text-white' : 'text-ink-600 hover:bg-slate-100'
-            }`
-          }
+        <button
+          type="button"
+          onClick={onOpenNotifications}
+          className="flex w-full items-center rounded-lg px-3 py-2.5 text-sm font-medium text-ink-600 hover:bg-slate-100"
         >
           Notifications
           <NavBadge count={unread} />
-        </NavLink>
+        </button>
       </nav>
     </>
   )
@@ -90,18 +92,40 @@ export default function ManagerLayout() {
   const navigate = useNavigate()
   const { stats } = useManagerTeam(user?.email, user?.name)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const unread = user?.email ? getManagerUnreadCount(user.email) : 0
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [notifications, setNotifications] = useState([])
+
+  useEffect(() => {
+    if (user?.email) setNotifications(getManagerNotifications(user.email))
+  }, [user?.email, drawerOpen])
+
+  const unread = notifications.filter((n) => !n.read).length
 
   function handleLogout() {
     logout()
     navigate('/login', { replace: true })
   }
 
+  function handleToggleRead(id) {
+    if (!user?.email) return notifications
+    const next = toggleManagerNotificationRead(user.email, id)
+    setNotifications(next)
+    return next
+  }
+
+  function handleMarkAllRead() {
+    if (!user?.email) return notifications
+    const next = markAllManagerNotificationsRead(user.email)
+    setNotifications(next)
+    return next
+  }
+
   const closeMobile = () => setMobileOpen(false)
+  const openDrawer = () => setDrawerOpen(true)
 
   const bottomNav = [
     ...mainNav.slice(0, 4),
-    { to: '/manager/notifications', end: false, short: 'Alerts' },
+    { to: '/manager/notifications', end: false, short: 'Alerts', isDrawer: true },
   ]
 
   return (
@@ -111,7 +135,7 @@ export default function ManagerLayout() {
           user={user}
           pendingCount={stats.pending}
           unread={unread}
-          onNavigate={undefined}
+          onOpenNotifications={openDrawer}
         />
         <div className="mt-auto border-t border-slate-100 p-3">
           <button
@@ -143,6 +167,10 @@ export default function ManagerLayout() {
           pendingCount={stats.pending}
           unread={unread}
           onNavigate={closeMobile}
+          onOpenNotifications={() => {
+            closeMobile()
+            openDrawer()
+          }}
         />
         <div className="mt-auto border-t border-slate-100 p-3">
           <button
@@ -174,35 +202,53 @@ export default function ManagerLayout() {
             <p className="truncate text-sm font-semibold">{user?.name}</p>
             <p className="text-xs text-ink-500">Manager portal</p>
           </div>
-          <NavLink
-            to="/manager/notifications"
-            className="relative rounded-lg p-2 hover:bg-slate-100 md:hidden"
-          >
-            <NavBadge count={unread} />
-          </NavLink>
+          <BellButton unread={unread} onClick={openDrawer} />
         </header>
 
         <nav className="fixed bottom-0 left-0 right-0 z-20 flex border-t bg-white md:hidden">
-          {bottomNav.map(({ to, end, short }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
-              className={({ isActive }) =>
-                `flex flex-1 flex-col items-center py-2 text-[10px] font-semibold ${
-                  isActive ? 'text-violet-700' : 'text-ink-500'
-                }`
-              }
-            >
-              {short}
-            </NavLink>
-          ))}
+          {bottomNav.map(({ to, end, short, isDrawer }) =>
+            isDrawer ? (
+              <button
+                key={short}
+                type="button"
+                onClick={openDrawer}
+                className="flex flex-1 flex-col items-center py-2 text-[10px] font-semibold text-ink-500"
+              >
+                {short}
+              </button>
+            ) : (
+              <NavLink
+                key={to}
+                to={to}
+                end={end}
+                className={({ isActive }) =>
+                  `flex flex-1 flex-col items-center py-2 text-[10px] font-semibold ${
+                    isActive ? 'text-violet-700' : 'text-ink-500'
+                  }`
+                }
+              >
+                {short}
+              </NavLink>
+            ),
+          )}
         </nav>
 
         <main className="flex-1 overflow-auto p-4 pb-24 md:p-8 md:pb-8">
           <Outlet />
         </main>
       </div>
+
+      {user?.email && (
+        <NotificationDrawer
+          open={drawerOpen}
+          onOpenChange={setDrawerOpen}
+          title="Manager notifications"
+          notificationsPath="/manager/notifications"
+          items={notifications}
+          onMarkAllRead={handleMarkAllRead}
+          onToggleRead={handleToggleRead}
+        />
+      )}
     </div>
   )
 }

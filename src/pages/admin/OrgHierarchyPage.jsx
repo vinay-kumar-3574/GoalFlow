@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import { SkeletonTableRows } from '../../components/ui/Skeleton'
+import { useDelayedLoading } from '../../hooks/useDelayedLoading'
 import { ROLES } from '../../lib/auth'
 import { useAuth } from '../../context/AuthContext'
 import { useAdminData } from '../../hooks/useAdminData'
@@ -14,6 +16,7 @@ const emptyForm = {
 }
 
 export default function OrgHierarchyPage() {
+  const loading = useDelayedLoading(300)
   const { user } = useAuth()
   const { orgEmployees, departments, upsertEmployee, deactivateEmployee, addDepartment, refresh } =
     useAdminData()
@@ -134,6 +137,11 @@ export default function OrgHierarchyPage() {
       </div>
 
       <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+        {loading ? (
+          <div className="p-4">
+            <SkeletonTableRows rows={6} />
+          </div>
+        ) : (
         <table className="w-full min-w-[900px] text-left text-sm">
           <thead>
             <tr className="border-b bg-slate-50 text-xs uppercase text-ink-500">
@@ -191,6 +199,7 @@ export default function OrgHierarchyPage() {
             ))}
           </tbody>
         </table>
+        )}
       </div>
 
       {modal && (

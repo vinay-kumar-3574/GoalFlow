@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 export default function InlineEditableCell({
   value,
@@ -6,6 +7,7 @@ export default function InlineEditableCell({
   type = 'text',
   onSave,
   onTab,
+  toastLabel,
   className = '',
 }) {
   const [editing, setEditing] = useState(false)
@@ -26,7 +28,10 @@ export default function InlineEditableCell({
 
   function commit() {
     setEditing(false)
-    if (String(draft) !== String(value ?? '')) onSave?.(draft)
+    if (String(draft) !== String(value ?? '')) {
+      onSave?.(draft)
+      if (toastLabel) toast.success(toastLabel)
+    }
   }
 
   function cancel() {

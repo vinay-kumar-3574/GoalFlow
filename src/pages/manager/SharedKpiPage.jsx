@@ -72,6 +72,8 @@ export default function SharedKpiPage() {
       uomType,
       uomDirection: uomType === UOM_TYPES.numeric || uomType === UOM_TYPES.percent ? uomDirection : null,
       weightageByEmail,
+      managerEmail: user.email,
+      managerName: user.name,
     })
 
     const ok = results.filter((r) => r.ok && !r.skipped).length
